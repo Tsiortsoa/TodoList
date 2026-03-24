@@ -29,7 +29,7 @@
             <div class="text-center py-3">
                 <h5 class="text-white">TaskFlow</h5>
             </div>
-            <ul class="nav flex-column">
+            <ul class="px-4 nav flex-column">
                 @auth
                 @if(auth()->user()->isApproved())
                 <li class="nav-item">
@@ -54,14 +54,6 @@
                     </a>
                 </li>
                 @endcan
-                <li class="nav-item mt-4">
-                    <form method="POST" action="{{ route('logout') }}" id="logout-form">
-                        @csrf
-                        <button type="submit" class="nav-link btn btn-link text-start w-100" style="color: #f8f9fa;">
-                            <i class="fas fa-sign-out-alt"></i> Logout
-                        </button>
-                    </form>
-                </li>
                 @else
                 <li class="nav-item">
                     <span class="nav-link text-warning"><i class="fas fa-clock"></i> Pending Approval</span>
@@ -75,6 +67,15 @@
                     </form>
                 </li>
                 @endif
+                <hr class="text-white-50">
+                <li class="nav-item mt-4">
+                    <form method="POST" action="{{ route('logout') }}" id="logout-form">
+                        @csrf
+                        <button type="submit" class="nav-link btn btn-link text-start w-100" style="color: #f8f9fa;">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </form>
+                </li>
                 @endauth
                 @guest
                 <li class="nav-item">
