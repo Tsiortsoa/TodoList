@@ -27,60 +27,56 @@ class TaskController extends Controller
      */
     public function index(Request $request)
     {
-        $user = $request->user();
-
-        // Base query
+        $user = auth()->user();
         $query = Task::with(['assignedUser', 'creator', 'tags']);
 
-        // Apply role-based visibility
+        // Visibility
         if (!$user->isAdmin()) {
             $query->where(function ($q) use ($user) {
                 $q->where('user_id', $user->id)
-                  ->orWhere('created_by', $user->id);
+                ->orWhere('created_by', $user->id);
             });
         }
 
-        // Filter by status (including trash)
-        if ($request->has('status') && $request->status === 'trash') {
-            $query->onlyTrashed();
-        } elseif ($request->has('status')) {
-            $query->where('status', $request->status);
-        } else {
-            // Default: active (pending) only
-            $query->pending();
+        // Status (including trash)
+        if ($request->filled('status')) {
+            if ($request->status === 'trash') {
+                $query->onlyTrashed();
+            } else {
+                $query->where('status', $request->status);
+            }
         }
 
-        // Date filters
-        if ($request->has('filter')) {
+        // Date filter
+        if ($request->filled('filter')) {
             switch ($request->filter) {
                 case 'overdue':
-                    $query->where('due_date', '<', now())->pending();
+                    $query->where('due_date', '<', now())->where('status', 'pending');
                     break;
                 case 'today':
-                    $query->whereDate('due_date', today());
+                    $query->whereDate('due_date', now());
                     break;
                 case 'upcoming':
-                    $query->where('due_date', '>', now())->pending();
+                    $query->where('due_date', '>', now())->where('status', 'pending');
                     break;
+            }
+        }
+
+        // Assignment filter
+        if ($request->filled('assigned')) {
+            if ($request->assigned === 'my') {
+                $query->where('user_id', $user->id);
+            } elseif ($request->assigned === 'by_admin') {
+                $query->whereHas('creator', fn($q) => $q->where('role', 'admin'));
             }
         }
 
         // Tag filter
-        if ($request->has('tag')) {
+        if ($request->filled('tag')) {
             $query->whereHas('tags', fn($q) => $q->where('tags.id', $request->tag));
         }
 
-        // Assignment filter
-        if ($request->has('assigned')) {
-            if ($request->assigned === 'my') {
-                $query->where('user_id', $user->id);
-            } elseif ($request->assigned === 'by_admin') {
-                $query->where('created_by', '!=', $user->id);
-            }
-        }
-
         $tasks = $query->latest()->paginate(15);
-
         return view('tasks.index', compact('tasks'));
     }
 

@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\UserController;
 | Public Routes
 |--------------------------------------------------------------------------
 */
+
 Route::get('/', function () {
     return redirect()->route('login');
 });
@@ -31,7 +32,7 @@ Route::get('pending-approval', [PendingApprovalController::class, 'index'])->nam
 | Authenticated & Approved Users
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'approved'])->group(function () {
+Route::middleware(['auth', 'approved', 'no-cache'])->group(function () {
     // Task management
     Route::resource('tasks', TaskController::class)->except(['destroy']);
     Route::delete('tasks/{task}', [TaskController::class, 'destroy'])->name('tasks.destroy'); // soft delete
@@ -49,6 +50,18 @@ Route::middleware(['auth', 'approved'])->group(function () {
 
     Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
 });
+
+Route::get('/', function () {
+    if (Auth::check()) {
+        return redirect()->route('dashboard');
+    }
+    return view('landing');
+})->name('home');
+
+Route::get('password/reset', 'App\Http\Controllers\Auth\ForgotPasswordController@showLinkRequestForm')->name('password.request');
+Route::post('password/email', 'App\Http\Controllers\Auth\ForgotPasswordController@sendResetLinkEmail')->name('password.email');
+Route::get('password/reset/{token}', 'App\Http\Controllers\Auth\ResetPasswordController@showResetForm')->name('password.reset');
+Route::post('password/reset', 'App\Http\Controllers\Auth\ResetPasswordController@reset')->name('password.update');
+
 Auth::routes();
 
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

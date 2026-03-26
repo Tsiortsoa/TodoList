@@ -7,7 +7,7 @@
     <div class="col-md-8">
         <div class="card">
             <div class="card-header">
-                <h4><i class="fas fa-plus-circle"></i> Create New Task</h4>
+                <h4><i class="fas fa-plus-circle"></i> Créer nouvelle tâche</h4>
             </div>
             <div class="card-body">
                 @include('tasks._form', [

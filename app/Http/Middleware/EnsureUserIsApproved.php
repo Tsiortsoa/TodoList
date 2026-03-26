@@ -13,12 +13,11 @@ class EnsureUserIsApproved
     /**
      * Handle an incoming request.
      */
-    public function handle(Request $request, Closure $next)
+    public function handle($request, Closure $next)
     {
         if (Auth::check() && !Auth::user()->isApproved()) {
             return redirect()->route('pending.approval');
         }
-
         return $next($request);
     }
 }

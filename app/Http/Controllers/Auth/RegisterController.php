@@ -50,9 +50,18 @@ class RegisterController extends Controller
     {
         return Validator::make($data, [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'email' => [
+                'required',
+                'string',
+                'email',
+                'max:255',
+                'unique:users',
+                'regex:/^[a-zA-Z0-9._%+-]+@(gmail\.com)$/'
+            ],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'role'     => ['required', 'string', 'in:user,admin'],
+            'role' => ['required', 'string', 'in:user,admin'],
+        ], [
+            'email.regex' => 'Email must be from @gmail.com',
         ]);
     }
 
@@ -68,8 +77,6 @@ class RegisterController extends Controller
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
-            'role'       => $data['role'],
-            'approved_at' => null,
         ]);
     }
 }
